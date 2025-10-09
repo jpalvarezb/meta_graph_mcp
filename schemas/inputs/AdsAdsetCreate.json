@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "ad_account_id": {
+      "title": "Ad Account Id",
+      "type": "string"
+    },
+    "spec": {
+      "additionalProperties": true,
+      "title": "Spec",
+      "type": "object"
+    }
+  },
+  "required": [
+    "ad_account_id",
+    "spec"
+  ],
+  "title": "AdsAdsetCreate",
+  "type": "object"
+}

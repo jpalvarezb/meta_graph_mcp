@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "after": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "After"
+    },
+    "kind": {
+      "enum": [
+        "photos",
+        "videos"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Limit"
+    },
+    "page_id": {
+      "title": "Page Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "page_id",
+    "kind"
+  ],
+  "title": "AssetsPageMediaList",
+  "type": "object"
+}

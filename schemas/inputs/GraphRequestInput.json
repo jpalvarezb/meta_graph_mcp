@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "body": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Body"
+    },
+    "method": {
+      "enum": [
+        "GET",
+        "POST",
+        "DELETE",
+        "PUT",
+        "PATCH"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "path": {
+      "description": "Graph API path including version prefix",
+      "title": "Path",
+      "type": "string"
+    },
+    "query": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Query"
+    }
+  },
+  "required": [
+    "method",
+    "path"
+  ],
+  "title": "GraphRequestInput",
+  "type": "object"
+}

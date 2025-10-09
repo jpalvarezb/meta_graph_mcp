@@ -1,0 +1,39 @@
+{
+  "properties": {
+    "after": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "After"
+    },
+    "ig_media_id": {
+      "title": "Ig Media Id",
+      "type": "string"
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Limit"
+    }
+  },
+  "required": [
+    "ig_media_id"
+  ],
+  "title": "ResearchPublicIgMediaCommentsList",
+  "type": "object"
+}

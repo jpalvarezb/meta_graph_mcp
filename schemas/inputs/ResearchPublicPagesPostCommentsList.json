@@ -1,0 +1,39 @@
+{
+  "properties": {
+    "after": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "After"
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Limit"
+    },
+    "post_id": {
+      "title": "Post Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "post_id"
+  ],
+  "title": "ResearchPublicPagesPostCommentsList",
+  "type": "object"
+}

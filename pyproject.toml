@@ -1,0 +1,84 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meta-mcp"
+version = "0.1.0"
+description = "Internal MCP server exposing Meta Graph and Marketing API tools"
+readme = "README.md"
+authors = [{ name = "Meta MCP Team" }]
+requires-python = ">=3.11"
+dependencies = [
+    "openai-mcp>=0.2.0",
+    "httpx>=0.27",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.0",
+    "structlog>=23.2",
+    "fastapi>=0.104",
+    "uvicorn>=0.23",
+    "sqlalchemy>=2.0",
+    "alembic>=1.12",
+    "aiosqlite>=0.19",
+    "cachetools>=5.3",
+    "python-dateutil>=2.8",
+    "typing-extensions>=4.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "respx>=0.20",
+    "coverage[toml]>=7.3",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.7",
+    "black>=23.12",
+    "mypy>=1.7",
+    "types-cachetools",
+    "types-dateutil",
+]
+
+[project.scripts]
+meta-mcp-server = "meta_mcp.server:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/meta_mcp", "src/mcp_meta_sdk"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "alembic", "docker", ".env.example"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "B", "I", "UP", "N", "ASYNC", "ANN", "A", "PL"]
+ignore = ["ANN101", "ANN102", "ANN401"]
+
+[tool.ruff.isort]
+known-first-party = ["meta_mcp", "mcp_meta_sdk"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["meta_mcp", "mcp_meta_sdk"]
+branch = true
+omit = ["*/__init__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90

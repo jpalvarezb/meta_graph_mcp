@@ -1,0 +1,28 @@
+{
+  "properties": {
+    "ad_account_id": {
+      "title": "Ad Account Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "objective": {
+      "title": "Objective",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "ad_account_id",
+    "name",
+    "objective",
+    "status"
+  ],
+  "title": "AdsCampaignCreate",
+  "type": "object"
+}

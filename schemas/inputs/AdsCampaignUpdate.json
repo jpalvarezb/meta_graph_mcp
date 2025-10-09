@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "campaign_id": {
+      "title": "Campaign Id",
+      "type": "string"
+    },
+    "patch": {
+      "additionalProperties": true,
+      "title": "Patch",
+      "type": "object"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "patch"
+  ],
+  "title": "AdsCampaignUpdate",
+  "type": "object"
+}

@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "max": {
+      "default": 50,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Max",
+      "type": "integer"
+    }
+  },
+  "title": "EventsDequeueRequest",
+  "type": "object"
+}

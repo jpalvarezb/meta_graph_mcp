@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "events": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "events"
+  ],
+  "title": "EventsDequeueResponse",
+  "type": "object"
+}

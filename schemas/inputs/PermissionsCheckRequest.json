@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "access_token": {
+      "title": "Access Token",
+      "type": "string"
+    }
+  },
+  "required": [
+    "access_token"
+  ],
+  "title": "PermissionsCheckRequest",
+  "type": "object"
+}

@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "adset_id": {
+      "title": "Adset Id",
+      "type": "string"
+    },
+    "patch": {
+      "additionalProperties": true,
+      "title": "Patch",
+      "type": "object"
+    }
+  },
+  "required": [
+    "adset_id",
+    "patch"
+  ],
+  "title": "AdsAdsetUpdate",
+  "type": "object"
+}

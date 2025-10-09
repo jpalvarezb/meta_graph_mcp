@@ -1,0 +1,39 @@
+{
+  "properties": {
+    "after": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "After"
+    },
+    "ig_user_id": {
+      "title": "Ig User Id",
+      "type": "string"
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Limit"
+    }
+  },
+  "required": [
+    "ig_user_id"
+  ],
+  "title": "ResearchPublicIgMediaList",
+  "type": "object"
+}

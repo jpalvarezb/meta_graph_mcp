@@ -1,0 +1,37 @@
+{
+  "properties": {
+    "authorization_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Authorization Url",
+      "type": "string"
+    },
+    "redirect_uri": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Redirect Uri",
+      "type": "string"
+    },
+    "scopes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Scopes",
+      "type": "array"
+    },
+    "state": {
+      "title": "State",
+      "type": "string"
+    }
+  },
+  "required": [
+    "authorization_url",
+    "state",
+    "redirect_uri",
+    "scopes"
+  ],
+  "title": "AuthLoginBeginResponse",
+  "type": "object"
+}

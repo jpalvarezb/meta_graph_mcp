@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "caption": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Caption"
+    },
+    "ig_user_id": {
+      "title": "Ig User Id",
+      "type": "string"
+    },
+    "image_url": {
+      "anyOf": [
+        {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Image Url"
+    },
+    "items": {
+      "anyOf": [
+        {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Items"
+    },
+    "media_type": {
+      "enum": [
+        "IMAGE",
+        "VIDEO",
+        "CAROUSEL"
+      ],
+      "title": "Media Type",
+      "type": "string"
+    },
+    "video_url": {
+      "anyOf": [
+        {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Video Url"
+    }
+  },
+  "required": [
+    "ig_user_id",
+    "media_type"
+  ],
+  "title": "IgMediaCreate",
+  "type": "object"
+}

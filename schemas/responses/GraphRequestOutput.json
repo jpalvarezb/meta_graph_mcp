@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "data": {
+      "title": "Data"
+    },
+    "headers": {
+      "additionalProperties": true,
+      "title": "Headers",
+      "type": "object"
+    },
+    "status": {
+      "title": "Status",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "status",
+    "headers",
+    "data"
+  ],
+  "title": "GraphRequestOutput",
+  "type": "object"
+}

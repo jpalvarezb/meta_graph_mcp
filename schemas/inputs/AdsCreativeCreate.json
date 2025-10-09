@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "ad_account_id": {
+      "title": "Ad Account Id",
+      "type": "string"
+    },
+    "creative": {
+      "additionalProperties": true,
+      "title": "Creative",
+      "type": "object"
+    }
+  },
+  "required": [
+    "ad_account_id",
+    "creative"
+  ],
+  "title": "AdsCreativeCreate",
+  "type": "object"
+}

@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "ad_account_id": {
+      "title": "Ad Account Id",
+      "type": "string"
+    },
+    "after": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "After"
+    },
+    "fields": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Fields",
+      "type": "array"
+    },
+    "limit": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Limit"
+    }
+  },
+  "required": [
+    "ad_account_id",
+    "fields"
+  ],
+  "title": "AdsAdsList",
+  "type": "object"
+}
