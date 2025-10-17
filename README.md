@@ -101,7 +101,7 @@ docker build -t meta-mcp:latest -f docker/Dockerfile .
 ruff check src tests
 black --check src tests
 mypy src tests
-pytest --cov=meta_mcp --cov=mcp_meta_sdk
+pytest --cov=meta_mcp --cov-report=term-missing --cov=mcp_meta_sdk
 ```
 
 ## Webhooks
@@ -144,7 +144,7 @@ Tool input/output schemas are generated from the Pydantic models into the `schem
 
 Run locally:
 ```bash
-pytest --cov=meta_mcp --cov=mcp_meta_sdk
+pytest --cov=meta_mcp --cov-report=term-missing --cov=mcp_meta_sdk
 ```
 
 ## Development Tasks

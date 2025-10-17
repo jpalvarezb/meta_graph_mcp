@@ -322,9 +322,9 @@ class MetaGraphApiClient:
         )
 
     def _classify_error(self, status: int, code: int | None) -> McpErrorCode:
-        if status == 401 or (code == 190):
+        if status == 401:
             return McpErrorCode.AUTH
-        if status == 403:
+        if status == 403 or (code == 190):
             return McpErrorCode.PERMISSION
         if status == 404:
             return McpErrorCode.NOT_FOUND

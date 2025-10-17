@@ -62,6 +62,6 @@ async def test_sdk_auth_login_methods() -> None:
     sdk = MetaMcpSdk(base_url="http://localhost")
     sdk._session = DummySession(lambda name: begin_payload if name == "auth.login.begin" else complete_payload)  # type: ignore[assignment]
     begin_response = await sdk.auth_login_begin(AuthLoginBeginRequest(scopes=["pages_manage_posts"]))
-    assert begin_response.authorization_url == "https://example.com/oauth"
+    assert str(begin_response.authorization_url) == "https://example.com/oauth"
     complete_response = await sdk.auth_login_complete(AuthLoginCompleteRequest(code="CODE"))
     assert complete_response.access_token == "token123"

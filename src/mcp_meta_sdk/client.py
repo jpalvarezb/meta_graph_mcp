@@ -181,6 +181,17 @@ class MetaMcpSdk:
             raise ToolResponseError(
                 f"Tool '{name}' returned no structured content",
             )
+        # Validate the response structure
+        if not isinstance(result.structuredContent, dict):
+            raise ToolResponseError(
+                f"Tool '{name}' returned invalid structured content type",
+            )
+        # Check if it's an error response before full validation
+        if result.structuredContent.get("ok") is False:
+            # For error responses, data field might be missing
+            response = ToolResponse.model_validate(result.structuredContent)
+            raise ToolExecutionError(response)
+        # For success responses, validate normally
         response = ToolResponse.model_validate(result.structuredContent)
         if not response.ok:
             raise ToolExecutionError(response)

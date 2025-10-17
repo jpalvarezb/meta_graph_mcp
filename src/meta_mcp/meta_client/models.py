@@ -309,7 +309,7 @@ class AdsCalendarNotePut(BaseModel):
 
 class ToolResponse(BaseModel):
     ok: bool
-    data: Any | None
+    data: Any = None
     meta: dict[str, Any]
     error: dict[str, Any] | None = None
 

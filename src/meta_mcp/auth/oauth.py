@@ -40,7 +40,8 @@ class MetaOAuthClient:
             "scope": scope_value,
             "response_type": "code",
         }
-        return str(httpx.URL(f"{base}/{version}/dialog/oauth").copy_add_params(params))
+        url = httpx.URL(f"{base}/{version}/dialog/oauth")
+        return str(url.copy_with(params=params))
 
     async def exchange_code(
         self,

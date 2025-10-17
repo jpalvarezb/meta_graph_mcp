@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+import sys
+import os
+
+# Add the src directory to sys.path for module discovery
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
+
 try:
     import pytest_asyncio  # type: ignore  # noqa: F401
     pytest_plugins = ("pytest_asyncio",)
