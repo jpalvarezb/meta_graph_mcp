@@ -68,13 +68,15 @@ This test validates the complete OAuth flow against the LIVE Meta API:
 from __future__ import annotations
 
 import os
+from collections.abc import AsyncIterator
 from datetime import datetime
-from typing import AsyncIterator
 
 import pytest
 from sqlalchemy import select
 
 from meta_mcp.config import MetaMcpSettings, get_settings
+from meta_mcp.mcp_tools import auth_login, core
+from meta_mcp.mcp_tools.common import ToolEnvironment
 from meta_mcp.meta_client import (
     AuthLoginBeginRequest,
     AuthLoginCompleteRequest,
@@ -82,12 +84,9 @@ from meta_mcp.meta_client import (
 )
 from meta_mcp.meta_client.auth import TokenService
 from meta_mcp.meta_client.client import MetaGraphApiClient
-from meta_mcp.mcp_tools import auth_login, core
-from meta_mcp.mcp_tools.common import ToolEnvironment
 from meta_mcp.storage import Token
-from meta_mcp.storage.db import get_session_factory, init_models, session_scope
+from meta_mcp.storage.db import init_models, session_scope
 from meta_mcp.storage.queue import WebhookEventQueue
-
 
 # Skip these tests by default unless explicitly enabled
 pytestmark = pytest.mark.skipif(
@@ -349,7 +348,7 @@ async def test_oauth_login_integration(integration_env: ToolEnvironment) -> None
     assert "id" in me_data
     assert me_data["id"] == subject_id
     
-    print(f"✓ Successfully called /me endpoint")
+    print("✓ Successfully called /me endpoint")
     print(f"✓ User ID: {me_data['id']}")
     if "name" in me_data:
         print(f"✓ User name: {me_data['name']}")
@@ -395,12 +394,12 @@ async def test_token_validation_with_real_api(integration_env: ToolEnvironment) 
         access_token = complete_result["data"]["access_token"]
     
     # Now test token validation
-    print(f"\nValidating token against Meta API...")
+    print("\nValidating token against Meta API...")
     metadata = await integration_env.token_service.inspect_token(
         access_token=access_token
     )
     
-    print(f"✓ Token is valid")
+    print("✓ Token is valid")
     print(f"✓ App ID: {metadata.app_id}")
     print(f"✓ Subject ID: {metadata.subject_id}")
     print(f"✓ Token type: {metadata.type.value}")
@@ -409,7 +408,7 @@ async def test_token_validation_with_real_api(integration_env: ToolEnvironment) 
     if metadata.expires_at:
         print(f"✓ Expires at: {metadata.expires_at.isoformat()}")
     else:
-        print(f"✓ Token does not expire (long-lived)")
+        print("✓ Token does not expire (long-lived)")
     
     # Verify token metadata
     assert metadata.app_id == integration_env.settings.app_id

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hmac
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -26,7 +26,7 @@ async def test_webhook_queue_roundtrip() -> None:
         topic="feed",
         object_id="123",
         payload={"foo": "bar"},
-        delivered_at=datetime(2024, 1, 1, tzinfo=timezone.utc),
+        delivered_at=datetime(2024, 1, 1, tzinfo=UTC),
     )
     events = await queue.dequeue(maximum=10)
     assert events

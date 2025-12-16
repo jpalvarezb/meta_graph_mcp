@@ -33,7 +33,7 @@ from meta_mcp.meta_client import (
     AssetsVideoUploadFinish,
     AssetsVideoUploadInit,
     AdLibrarySearch,
-    GraphRequestInput,
+    GraphRequestInput, PermissionsCheckRequest, EventsDequeueRequest,
     InsightsAdsAccount,
     PagesPostsPublish,
     PagePhotosCreate,

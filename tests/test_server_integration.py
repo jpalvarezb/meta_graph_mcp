@@ -7,14 +7,14 @@ These tests verify:
 
 from __future__ import annotations
 
-import pytest
 import httpx
+import pytest
 
 respx = pytest.importorskip("respx")
 
-from meta_mcp.server import create_server
 from meta_mcp.config import MetaMcpSettings
 from meta_mcp.meta_client import AuthLoginBeginRequest, AuthLoginCompleteRequest
+from meta_mcp.server import create_server
 
 
 @pytest.fixture
@@ -78,15 +78,14 @@ async def test_oauth_login_complete_workflow(test_settings):
     # Step 1: Begin OAuth flow
     # We need to directly test the tool handlers that were registered
     # For now, we'll test using the existing test approach from test_auth_login.py
+    # Create tool environment (use test_settings)
+    # We need to ensure the client uses our test settings
+    from meta_mcp.config import get_settings
     from meta_mcp.mcp_tools import auth_login
     from meta_mcp.mcp_tools.common import ToolEnvironment
     from meta_mcp.meta_client import MetaGraphApiClient
     from meta_mcp.meta_client.auth import TokenService
     from meta_mcp.storage.queue import WebhookEventQueue
-    
-    # Create tool environment (use test_settings)
-    # We need to ensure the client uses our test settings
-    from meta_mcp.config import get_settings
     get_settings.cache_clear()  # Clear any cached settings
     
     # Create client that will use test_settings
@@ -94,7 +93,6 @@ async def test_oauth_login_complete_workflow(test_settings):
     # Override the client's settings with test_settings
     client.settings = test_settings
     # Recreate the httpx client with correct base_url
-    import httpx
     client._client = httpx.AsyncClient(
         base_url=test_settings.graph_api_base_url,
         timeout=httpx.Timeout(test_settings.default_timeout_seconds),

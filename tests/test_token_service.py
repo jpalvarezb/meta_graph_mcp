@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from meta_mcp.errors import MCPException, McpErrorCode
+from meta_mcp.errors import McpErrorCode, MCPException
 from meta_mcp.meta_client.auth import TokenService
 from meta_mcp.storage import TokenType
 

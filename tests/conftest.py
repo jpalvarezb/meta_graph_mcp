@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 # Add the src directory to sys.path for module discovery
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
@@ -13,7 +13,6 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     pytest_plugins: tuple[str, ...] = tuple()
 
-import asyncio
 import os
 from collections.abc import AsyncIterator
 

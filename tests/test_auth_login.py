@@ -7,11 +7,11 @@ respx = pytest.importorskip("respx")
 
 from meta_mcp.auth import MetaOAuthClient
 from meta_mcp.config import get_settings
-from meta_mcp.meta_client import AuthLoginCompleteRequest
-from meta_mcp.meta_client.client import MetaGraphApiClient
-from meta_mcp.meta_client.auth import TokenService
 from meta_mcp.mcp_tools import auth_login
 from meta_mcp.mcp_tools.common import ToolEnvironment
+from meta_mcp.meta_client import AuthLoginCompleteRequest
+from meta_mcp.meta_client.auth import TokenService
+from meta_mcp.meta_client.client import MetaGraphApiClient
 from meta_mcp.storage.queue import WebhookEventQueue
 
 

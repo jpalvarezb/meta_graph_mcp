@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import asyncio
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pytest
-
-from meta_mcp.meta_client import GraphRequestInput, AuthLoginBeginRequest, AuthLoginCompleteRequest
-from meta_mcp.meta_client.models import ToolResponse
-from mcp_meta_sdk import MetaMcpSdk, ToolExecutionError, ToolResponseError
 from mcp import types
+
+from mcp_meta_sdk import MetaMcpSdk, ToolExecutionError, ToolResponseError
+from meta_mcp.meta_client import AuthLoginBeginRequest, AuthLoginCompleteRequest, GraphRequestInput
+from meta_mcp.meta_client.models import ToolResponse
 
 
 class DummySession:

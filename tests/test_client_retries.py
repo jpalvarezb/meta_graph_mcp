@@ -6,7 +6,7 @@ import pytest
 respx = pytest.importorskip("respx")
 
 from meta_mcp.config import get_settings
-from meta_mcp.errors import MCPException, McpErrorCode
+from meta_mcp.errors import McpErrorCode, MCPException
 from meta_mcp.meta_client.client import MetaGraphApiClient
 
 
