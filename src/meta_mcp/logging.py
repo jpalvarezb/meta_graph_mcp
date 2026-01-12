@@ -37,7 +37,7 @@ def configure_logging() -> None:
 
     logging.basicConfig(
         level=logging.INFO,
-        stream=sys.stdout,
+        stream=sys.stderr,
         format="%(message)s",
         force=True,
     )

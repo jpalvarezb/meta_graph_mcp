@@ -12,8 +12,10 @@ from typing import Iterable, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..errors import MCPException, McpError, McpErrorCode
+from sqlalchemy import desc, select
+
 from ..logging import get_logger
-from ..storage import Token, TokenType, session_scope
+from ..storage import SessionToken, Token, TokenType, session_scope
 from .client import MetaGraphApiClient
 
 logger = get_logger(__name__)
@@ -38,7 +40,9 @@ class TokenMetadata:
     def is_expired(self) -> bool:
         if self.expires_at is None:
             return False
-        return datetime.now(timezone.utc) >= self.expires_at
+        # Ensure expires_at is timezone-aware before comparison
+        expires_at_aware = self.expires_at.replace(tzinfo=timezone.utc) if self.expires_at.tzinfo is None else self.expires_at
+        return datetime.now(timezone.utc) >= expires_at_aware
 
 
 class TokenService:
@@ -179,13 +183,58 @@ class TokenService:
     async def record_ig_publish(self, *, ig_user_id: str) -> None:
         await self.assert_ig_publish_allowed(ig_user_id=ig_user_id)
 
+    async def save_session_token(
+        self,
+        *,
+        access_token: str,
+        scopes: list[str],
+        expires_at: datetime | None = None,
+    ) -> None:
+        """Persist a raw access token for session reuse."""
+        async with session_scope() as session:
+            token = SessionToken(
+                access_token=access_token,
+                scopes=scopes,
+                issued_at=datetime.now(timezone.utc),
+                expires_at=expires_at,
+            )
+            session.add(token)
+
+    async def get_session_token_for_scopes(
+        self,
+        required_scopes: list[str],
+    ) -> str | None:
+        """Retrieve the most recent non-expired token that has all required scopes."""
+        now = datetime.now(timezone.utc)
+        async with session_scope() as session:
+            stmt = (
+                select(SessionToken)
+                .order_by(desc(SessionToken.issued_at))
+            )
+            result = await session.execute(stmt)
+            rows = result.scalars().all()
+            
+            for row in rows:
+                # Skip expired tokens
+                if row.expires_at:
+                    expires_at_aware = row.expires_at.replace(tzinfo=timezone.utc) if row.expires_at.tzinfo is None else row.expires_at
+                    if expires_at_aware <= now:
+                        continue
+                # Check if token has all required scopes
+                if all(scope in row.scopes for scope in required_scopes):
+                    return row.access_token
+            
+            return None
+
     def _hash_token(self, token: str) -> str:
         return hashlib.sha256(token.encode()).hexdigest()
 
     def _needs_refresh(self, token: Token) -> bool:
         if token.expires_at is None:
             return False
-        return token.expires_at <= datetime.now(timezone.utc) + timedelta(minutes=5)
+        # Ensure token.expires_at is timezone-aware before comparison
+        expires_at_aware = token.expires_at.replace(tzinfo=timezone.utc) if token.expires_at.tzinfo is None else token.expires_at
+        return expires_at_aware <= datetime.now(timezone.utc) + timedelta(minutes=5)
 
     def _row_to_metadata(self, row: Token) -> TokenMetadata:
         return TokenMetadata(

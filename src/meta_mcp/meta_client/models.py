@@ -42,7 +42,7 @@ class PermissionsCheckResponse(BaseModel):
 
 
 class AuthLoginBeginRequest(BaseModel):
-    scopes: Sequence[str]
+    scopes: Sequence[str] | None = None
     redirect_uri: HttpUrl | None = None
     state: str | None = None
 

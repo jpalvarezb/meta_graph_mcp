@@ -38,7 +38,7 @@ ADS_INSIGHTS_SCOPES = (
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     version = env.settings.graph_api_version
 
-    @server.tool(name="insights.page.account", structured_output=True)
+    @server.tool(name="insights.page.account", structured_output=True, description="Get insights/metrics for a Facebook Page.")
     async def page_account_insights(args: InsightsPageAccount, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -61,7 +61,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="insights.ig.account", structured_output=True)
+    @server.tool(name="insights.ig.account", structured_output=True, description="Get insights/metrics for an Instagram Business Account.")
     async def ig_account_insights(args: InsightsIgAccount, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -83,7 +83,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="insights.ig.media", structured_output=True)
+    @server.tool(name="insights.ig.media", structured_output=True, description="Get insights/metrics for a specific Instagram media object.")
     async def ig_media_insights(args: InsightsIgMedia, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -103,7 +103,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="insights.ads.account", structured_output=True)
+    @server.tool(name="insights.ads.account", structured_output=True, description="Get insights/metrics for an ad account.")
     async def ads_account_insights(args: InsightsAdsAccount, ctx: Context) -> Mapping[str, object]:
         try:
             query = {

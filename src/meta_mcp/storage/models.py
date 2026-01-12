@@ -76,6 +76,17 @@ class CalendarNote(Base):
     related_ids: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
 
+class SessionToken(Base):
+    """Stores raw access tokens for session persistence."""
+    __tablename__ = "session_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    access_token: Mapped[str] = mapped_column(Text, nullable=False)
+    scopes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 __all__ = [
     "Base",
     "Token",
@@ -84,4 +95,5 @@ __all__ = [
     "Job",
     "JobStatus",
     "CalendarNote",
+    "SessionToken",
 ]

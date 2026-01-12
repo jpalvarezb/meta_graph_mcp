@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
-FROM python:3.11-alpine AS builder
+FROM python:3.11-slim-bookworm AS builder
 WORKDIR /app
 
 # System dependencies for building wheels (httpx, sqlalchemy extras).
-RUN apk add --no-cache build-base libffi-dev openssl-dev
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential libffi-dev libssl-dev && rm -rf /var/lib/apt/lists/*
 
 # Install project with dependencies into /install
 COPY pyproject.toml README.md .
@@ -14,8 +14,8 @@ RUN python -m venv /opt/venv \
     && pip install --upgrade pip wheel \
     && pip install --no-cache-dir .
 
-# Runtime image: distroless python
-FROM gcr.io/distroless/python3-debian12:nonroot AS runtime
+# Runtime image: python slim (easier debugging, guaranteed compatibility)
+FROM python:3.11-slim-bookworm AS runtime
 ENV PYTHONPATH=/app/src \
     PATH="/opt/venv/bin:$PATH" \
     META_MCP_GRAPH_API_BASE_URL=https://graph.facebook.com \

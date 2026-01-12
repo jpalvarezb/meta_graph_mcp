@@ -19,7 +19,7 @@ class _StubServer:
     def __init__(self) -> None:
         self.tools: dict[str, object] = {}
 
-    def tool(self, name: str, structured_output: bool = True):  # pragma: no cover - decorator wrapper
+    def tool(self, name: str, structured_output: bool = True, **kwargs):  # pragma: no cover - decorator wrapper
         def decorator(fn):
             self.tools[name] = fn
             return fn

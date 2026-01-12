@@ -40,7 +40,7 @@ IG_CONTENT_SCOPES = (
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     version = env.settings.graph_api_version
 
-    @server.tool(name="assets.page.media.list", structured_output=True)
+    @server.tool(name="assets.page.media.list", structured_output=True, description="List media (photos/videos) for a page.")
     async def page_media_list(args: AssetsPageMediaList, ctx: Context) -> Mapping[str, object]:
         try:
             path = f"/{version}/{args.page_id}/{args.kind}"
@@ -62,7 +62,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="assets.video.upload.init", structured_output=True)
+    @server.tool(name="assets.video.upload.init", structured_output=True, description="Initialize a resumable video upload session.")
     async def video_upload_init(args: AssetsVideoUploadInit, ctx: Context) -> Mapping[str, object]:
         try:
             path = f"/{version}/{args.page_id}/videos"
@@ -87,7 +87,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="assets.video.upload.chunk", structured_output=True)
+    @server.tool(name="assets.video.upload.chunk", structured_output=True, description="Upload a chunk of data for a video upload session.")
     async def video_upload_chunk(args: AssetsVideoUploadChunk, ctx: Context) -> Mapping[str, object]:
         try:
             path = f"/{version}/{args.upload_session_id}"
@@ -113,7 +113,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="assets.video.upload.finish", structured_output=True)
+    @server.tool(name="assets.video.upload.finish", structured_output=True, description="Finish a video upload session.")
     async def video_upload_finish(args: AssetsVideoUploadFinish, ctx: Context) -> Mapping[str, object]:
         try:
             path = f"/{version}/{args.upload_session_id}"
@@ -136,7 +136,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="assets.video.subtitles.upload", structured_output=True)
+    @server.tool(name="assets.video.subtitles.upload", structured_output=True, description="Upload subtitles for a video.")
     async def video_subtitles_upload(args: AssetsVideoSubtitlesUpload, ctx: Context) -> Mapping[str, object]:
         try:
             path = f"/{version}/{args.video_id}/captions"
@@ -163,7 +163,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ig.media.create", structured_output=True)
+    @server.tool(name="ig.media.create", structured_output=True, description="Create an Instagram media container (for publishing).")
     async def ig_media_create(args: IgMediaCreate, ctx: Context) -> Mapping[str, object]:
         try:
             access_token, metadata = await ensure_scopes(
@@ -201,7 +201,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="page.photos.create", structured_output=True)
+    @server.tool(name="page.photos.create", structured_output=True, description="Upload and publish a photo to a Facebook Page.")
     async def page_photos_create(args: PagePhotosCreate, ctx: Context) -> Mapping[str, object]:
         try:
             form: dict[str, object] = {}
@@ -232,7 +232,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="page.videos.create", structured_output=True)
+    @server.tool(name="page.videos.create", structured_output=True, description="Upload and publish a video to a Facebook Page.")
     async def page_videos_create(args: PageVideosCreate, ctx: Context) -> Mapping[str, object]:
         try:
             form: dict[str, object] = {}

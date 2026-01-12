@@ -10,6 +10,7 @@ from typing import Any, Mapping, Sequence
 
 from mcp.server.fastmcp import Context
 
+from ..auth import MetaOAuthClient, generate_state
 from ..config import MetaMcpSettings
 from ..errors import MCPException, McpError, McpErrorCode, error_response
 from ..logging import get_logger
@@ -119,7 +120,44 @@ async def ensure_scopes(
     token_hint: TokenType | None = None,
     provided_token: str | None = None,
 ) -> tuple[str, TokenMetadata]:
-    access_token = resolve_access_token(ctx, provided=provided_token, settings=env.settings)
+    import traceback
+    access_token: str | None = None
+    
+    # First, try to resolve from request context or env
+    try:
+        access_token = resolve_access_token(ctx, provided=provided_token, settings=env.settings)
+    except MCPException:
+        # Token not found in context/env, try session token from DB
+        try:
+            access_token = await env.token_service.get_session_token_for_scopes(
+                required_scopes=list(required_scopes)
+            )
+        except Exception as e:
+            logger.error("error_getting_session_token", error=str(e), traceback=traceback.format_exc())
+            raise
+    
+    if not access_token:
+        # No token available anywhere, generate auth URL for user
+        oauth_client = MetaOAuthClient(env.settings)
+        state = generate_state(16)
+        redirect_uri = str(env.settings.oauth_redirect_uri)
+        url = oauth_client.build_authorization_url(
+            scopes=list(required_scopes),
+            redirect_uri=redirect_uri,
+            state=state,
+        )
+        raise MCPException(
+            McpError(
+                code=McpErrorCode.AUTH,
+                message=f"Authentication required. Please login at: {url}",
+                details={
+                    "authorization_url": url,
+                    "state": state,
+                    "instructions": "1. Open the URL. 2. Authorize the app. 3. Copy the 'code' from the redirect. 4. Use 'auth.login.complete' with the code."
+                },
+            )
+        )
+
     metadata = await env.token_service.ensure_permissions(
         access_token=access_token,
         required_scopes=list(required_scopes),

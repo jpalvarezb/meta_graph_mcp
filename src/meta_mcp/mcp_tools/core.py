@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     """Register core tool handlers."""
 
-    @server.tool(name="graph.request", structured_output=True)
+    @server.tool(name="graph.request", structured_output=True, description="Make a raw Facebook Graph API request.")
     async def graph_request(args: GraphRequestInput, ctx: Context) -> Mapping[str, object]:
         try:
             use_cache = args.method.upper() == "GET"
@@ -42,7 +42,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="auth.permissions.check", structured_output=True)
+    @server.tool(name="auth.permissions.check", structured_output=True, description="Check the permissions and validity of the current access token.")
     async def permissions_check(args: PermissionsCheckRequest, ctx: Context) -> Mapping[str, object]:
         try:
             access_token, metadata = await ensure_scopes(
@@ -67,7 +67,7 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="events.dequeue", structured_output=True)
+    @server.tool(name="events.dequeue", structured_output=True, description="Dequeue received webhook events.")
     async def events_dequeue(args: EventsDequeueRequest, ctx: Context) -> Mapping[str, object]:
         queue = env.event_queue
         events = await queue.dequeue(maximum=args.max)

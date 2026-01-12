@@ -64,10 +64,21 @@ def main(argv: list[str] | None = None) -> None:
         default=DEFAULT_TRANSPORT,
         help="Transport protocol to use",
     )
+    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     args = parser.parse_args(argv)
 
     server = create_server()
-    server.run(transport=args.transport)
+    
+    if args.transport == "streamable-http":
+        import uvicorn
+        # FastMCP exposes the Starlette app via streamable_http_app
+        uvicorn.run(server.streamable_http_app, host=args.host, port=args.port)
+    elif args.transport == "sse":
+        import uvicorn
+        uvicorn.run(server.sse_app, host=args.host, port=args.port)
+    else:
+        server.run(transport="stdio")
 
 
 if __name__ == "__main__":

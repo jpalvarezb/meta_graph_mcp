@@ -113,7 +113,7 @@ async def test_oauth_login_complete_workflow(test_settings):
         def __init__(self):
             self.tools = {}
         
-        def tool(self, name: str, structured_output: bool = True):
+        def tool(self, name: str, structured_output: bool = True, **kwargs):
             def decorator(fn):
                 self.tools[name] = fn
                 return fn
