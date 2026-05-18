@@ -23,7 +23,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
     verify_token = env.settings.verify_token
 
     @server.custom_route("/webhooks/meta", methods=["GET"], name="meta_webhook_verify")
-    async def verify(request: Request) -> Response:  # pragma: no cover - exercised via integration tests
+    async def verify(
+        request: Request,
+    ) -> Response:  # pragma: no cover - exercised via integration tests
         params = request.query_params
         mode = params.get("hub.mode")
         token = params.get("hub.verify_token")
@@ -51,7 +53,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         normalized_count = 0
         for entry in entries:
             topic = entry.get("object", "unknown")
-            delivered_at = datetime.fromtimestamp(entry.get("time", datetime.now(timezone.utc).timestamp()), tz=timezone.utc)
+            delivered_at = datetime.fromtimestamp(
+                entry.get("time", datetime.now(timezone.utc).timestamp()), tz=timezone.utc
+            )
             for change in entry.get("changes", []) or []:
                 object_id = change.get("value", {}).get("id") or entry.get("id", "unknown")
                 event_payload = {

@@ -49,7 +49,9 @@ class MetaMcpSettings(BaseSettings):
         default="sqlite+aiosqlite:///./meta_mcp.db",
         description="SQLAlchemy database URL",
     )
-    cache_maxsize: int = Field(default=256, ge=0, description="Maximum entries for in-memory caches")
+    cache_maxsize: int = Field(
+        default=256, ge=0, description="Maximum entries for in-memory caches"
+    )
     rate_limit_per_app: int = Field(default=90, ge=1, description="Requests per minute allowance")
     rate_limit_per_token: int = Field(default=30, ge=1, description="Per-token requests per minute")
     webhook_queue_workers: int = Field(default=2, ge=1, description="Webhook worker concurrency")

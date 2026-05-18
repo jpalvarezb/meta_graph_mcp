@@ -19,7 +19,9 @@ class _StubServer:
     def __init__(self) -> None:
         self.tools: dict[str, object] = {}
 
-    def tool(self, name: str, structured_output: bool = True, **kwargs):  # pragma: no cover - decorator wrapper
+    def tool(
+        self, name: str, structured_output: bool = True, **kwargs
+    ):  # pragma: no cover - decorator wrapper
         def decorator(fn):
             self.tools[name] = fn
             return fn
@@ -38,7 +40,9 @@ async def test_build_authorization_url_includes_scopes() -> None:
     )
     assert "scope=" in url
     assert "pages_manage_posts" in url
-    assert url.startswith(f"{settings.facebook_oauth_base_url.rstrip('/')}/{settings.graph_api_version}/dialog/oauth")
+    assert url.startswith(
+        f"{settings.facebook_oauth_base_url.rstrip('/')}/{settings.graph_api_version}/dialog/oauth"
+    )
 
 
 @pytest.mark.asyncio
@@ -48,10 +52,17 @@ async def test_login_complete_flow() -> None:
     server = _StubServer()
     client = MetaGraphApiClient()
     token_service = TokenService(client)
-    env = ToolEnvironment(settings=settings, client=client, token_service=token_service, event_queue=WebhookEventQueue())
+    env = ToolEnvironment(
+        settings=settings,
+        client=client,
+        token_service=token_service,
+        event_queue=WebhookEventQueue(),
+    )
     auth_login.register(server, env)
 
-    respx.get(f"{settings.graph_api_base_url}/{settings.graph_api_version}/oauth/access_token").mock(
+    respx.get(
+        f"{settings.graph_api_base_url}/{settings.graph_api_version}/oauth/access_token"
+    ).mock(
         return_value=httpx.Response(
             200,
             json={"access_token": "token123", "token_type": "bearer", "expires_in": 3600},

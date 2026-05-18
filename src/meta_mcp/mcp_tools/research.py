@@ -49,8 +49,14 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
 
     version = env.settings.graph_api_version
 
-    @server.tool(name="research.public_pages.posts.list", structured_output=True, description="List public posts from a specific Facebook Page.")
-    async def public_pages_posts(args: ResearchPublicPagesPostsList, ctx: Context) -> Mapping[str, object]:
+    @server.tool(
+        name="research.public_pages.posts.list",
+        structured_output=True,
+        description="List public posts from a specific Facebook Page.",
+    )
+    async def public_pages_posts(
+        args: ResearchPublicPagesPostsList, ctx: Context
+    ) -> Mapping[str, object]:
         try:
             query = {
                 "since": datetime_to_timestamp(args.since),
@@ -73,8 +79,14 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="research.public_pages.post_comments.list", structured_output=True, description="List comments on a public Facebook Page post.")
-    async def public_pages_comments(args: ResearchPublicPagesPostCommentsList, ctx: Context) -> Mapping[str, object]:
+    @server.tool(
+        name="research.public_pages.post_comments.list",
+        structured_output=True,
+        description="List comments on a public Facebook Page post.",
+    )
+    async def public_pages_comments(
+        args: ResearchPublicPagesPostCommentsList, ctx: Context
+    ) -> Mapping[str, object]:
         try:
             query = {
                 "after": args.after,
@@ -95,8 +107,14 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="research.public_ig.media.list", structured_output=True, description="List media from a public Instagram account.")
-    async def public_ig_media(args: ResearchPublicIgMediaList, ctx: Context) -> Mapping[str, object]:
+    @server.tool(
+        name="research.public_ig.media.list",
+        structured_output=True,
+        description="List media from a public Instagram account.",
+    )
+    async def public_ig_media(
+        args: ResearchPublicIgMediaList, ctx: Context
+    ) -> Mapping[str, object]:
         try:
             query = {
                 "after": args.after,
@@ -116,8 +134,14 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="research.public_ig.media_comments.list", structured_output=True, description="List comments on a public Instagram media object.")
-    async def public_ig_media_comments(args: ResearchPublicIgMediaCommentsList, ctx: Context) -> Mapping[str, object]:
+    @server.tool(
+        name="research.public_ig.media_comments.list",
+        structured_output=True,
+        description="List comments on a public Instagram media object.",
+    )
+    async def public_ig_media_comments(
+        args: ResearchPublicIgMediaCommentsList, ctx: Context
+    ) -> Mapping[str, object]:
         try:
             query = {
                 "after": args.after,
@@ -137,7 +161,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="research.object.reactions", structured_output=True, description="Get reaction summaries for a Facebook object (post, photo, etc.).")
+    @server.tool(
+        name="research.object.reactions",
+        structured_output=True,
+        description="Get reaction summaries for a Facebook object (post, photo, etc.).",
+    )
     async def object_reactions(args: ResearchObjectReactions, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -159,7 +187,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="research.ad_library.search", structured_output=True, description="Search the Meta Ad Library.")
+    @server.tool(
+        name="research.ad_library.search",
+        structured_output=True,
+        description="Search the Meta Ad Library.",
+    )
     async def ad_library_search(args: AdLibrarySearch, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -187,10 +219,16 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
             return failure(exc.error)
         except Exception as e:
             logger = get_logger(__name__)
-            logger.error("unhandled_error_in_ad_search", error=str(e), traceback=traceback.format_exc())
+            logger.error(
+                "unhandled_error_in_ad_search", error=str(e), traceback=traceback.format_exc()
+            )
             return failure(McpError(code=McpErrorCode.INTERNAL, message="Internal server error"))
 
-    @server.tool(name="research.ad_library.by_page", structured_output=True, description="Search the Meta Ad Library for ads by specific pages.")
+    @server.tool(
+        name="research.ad_library.by_page",
+        structured_output=True,
+        description="Search the Meta Ad Library for ads by specific pages.",
+    )
     async def ad_library_by_page(args: AdLibraryByPage, ctx: Context) -> Mapping[str, object]:
         try:
             query = {

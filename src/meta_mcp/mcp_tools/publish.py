@@ -28,7 +28,11 @@ IG_PUBLISH_SCOPES = (
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     version = env.settings.graph_api_version
 
-    @server.tool(name="pages.posts.publish", structured_output=True, description="Publish a text post (status update) or link to a Facebook Page.")
+    @server.tool(
+        name="pages.posts.publish",
+        structured_output=True,
+        description="Publish a text post (status update) or link to a Facebook Page.",
+    )
     async def pages_posts_publish(args: PagesPostsPublish, ctx: Context) -> Mapping[str, object]:
         try:
             body = {
@@ -36,9 +40,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
                 "link": str(args.link) if args.link else None,
                 "attached_media": args.attached_media,
                 "published": args.published,
-                "scheduled_publish_time": int(args.scheduled_publish_time.timestamp())
-                if args.scheduled_publish_time
-                else None,
+                "scheduled_publish_time": (
+                    int(args.scheduled_publish_time.timestamp())
+                    if args.scheduled_publish_time
+                    else None
+                ),
             }
             return await perform_graph_call(
                 env=env,
@@ -56,7 +62,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ig.media.publish", structured_output=True, description="Publish an Instagram media container.")
+    @server.tool(
+        name="ig.media.publish",
+        structured_output=True,
+        description="Publish an Instagram media container.",
+    )
     async def ig_media_publish(args: IgMediaPublish, ctx: Context) -> Mapping[str, object]:
         try:
             access_token, metadata = await ensure_scopes(
@@ -85,7 +95,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ig.carousel.publish", structured_output=True, description="Publish an Instagram carousel container.")
+    @server.tool(
+        name="ig.carousel.publish",
+        structured_output=True,
+        description="Publish an Instagram carousel container.",
+    )
     async def ig_carousel_publish(args: IgCarouselPublish, ctx: Context) -> Mapping[str, object]:
         try:
             access_token, _metadata = await ensure_scopes(

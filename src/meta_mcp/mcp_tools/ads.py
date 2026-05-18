@@ -33,7 +33,9 @@ ADS_MANAGEMENT_SCOPES = (
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     version = env.settings.marketing_api_version or env.settings.graph_api_version
 
-    @server.tool(name="ads.campaigns.create", structured_output=True, description="Create a new ad campaign.")
+    @server.tool(
+        name="ads.campaigns.create", structured_output=True, description="Create a new ad campaign."
+    )
     async def campaigns_create(args: AdsCampaignCreate, ctx: Context) -> Mapping[str, object]:
         try:
             body = {
@@ -57,7 +59,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.campaigns.list", structured_output=True, description="List ad campaigns for an ad account.")
+    @server.tool(
+        name="ads.campaigns.list",
+        structured_output=True,
+        description="List ad campaigns for an ad account.",
+    )
     async def campaigns_list(args: AdsCampaignList, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -79,7 +85,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.campaigns.update", structured_output=True, description="Update an existing ad campaign.")
+    @server.tool(
+        name="ads.campaigns.update",
+        structured_output=True,
+        description="Update an existing ad campaign.",
+    )
     async def campaigns_update(args: AdsCampaignUpdate, ctx: Context) -> Mapping[str, object]:
         try:
             return await perform_graph_call(
@@ -98,7 +108,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.adsets.create", structured_output=True, description="Create a new ad set.")
+    @server.tool(
+        name="ads.adsets.create", structured_output=True, description="Create a new ad set."
+    )
     async def adsets_create(args: AdsAdsetCreate, ctx: Context) -> Mapping[str, object]:
         try:
             return await perform_graph_call(
@@ -117,7 +129,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.adsets.list", structured_output=True, description="List ad sets for an ad account.")
+    @server.tool(
+        name="ads.adsets.list",
+        structured_output=True,
+        description="List ad sets for an ad account.",
+    )
     async def adsets_list(args: AdsAdsetList, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -139,7 +155,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.adsets.update", structured_output=True, description="Update an existing ad set.")
+    @server.tool(
+        name="ads.adsets.update", structured_output=True, description="Update an existing ad set."
+    )
     async def adsets_update(args: AdsAdsetUpdate, ctx: Context) -> Mapping[str, object]:
         try:
             return await perform_graph_call(
@@ -158,7 +176,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.creatives.create", structured_output=True, description="Create a new ad creative.")
+    @server.tool(
+        name="ads.creatives.create", structured_output=True, description="Create a new ad creative."
+    )
     async def creatives_create(args: AdsCreativeCreate, ctx: Context) -> Mapping[str, object]:
         try:
             return await perform_graph_call(
@@ -196,7 +216,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.ads.list", structured_output=True, description="List ads for an ad account.")
+    @server.tool(
+        name="ads.ads.list", structured_output=True, description="List ads for an ad account."
+    )
     async def ads_list(args: AdsAdsList, ctx: Context) -> Mapping[str, object]:
         try:
             query = {
@@ -218,7 +240,9 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.ads.update", structured_output=True, description="Update an existing ad.")
+    @server.tool(
+        name="ads.ads.update", structured_output=True, description="Update an existing ad."
+    )
     async def ads_update(args: AdsAdsUpdate, ctx: Context) -> Mapping[str, object]:
         try:
             return await perform_graph_call(
@@ -237,7 +261,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="ads.calendar.note.put", structured_output=True, description="Create or update a calendar note.")
+    @server.tool(
+        name="ads.calendar.note.put",
+        structured_output=True,
+        description="Create or update a calendar note.",
+    )
     async def calendar_note_put(args: AdsCalendarNotePut, ctx: Context) -> Mapping[str, object]:
         note = CalendarNote(
             idempotency_key=args.idempotency_key,

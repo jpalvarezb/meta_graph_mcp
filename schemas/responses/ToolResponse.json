@@ -1,12 +1,7 @@
 {
   "properties": {
     "data": {
-      "anyOf": [
-        {},
-        {
-          "type": "null"
-        }
-      ],
+      "default": null,
       "title": "Data"
     },
     "error": {
@@ -34,7 +29,6 @@
   },
   "required": [
     "ok",
-    "data",
     "meta"
   ],
   "title": "ToolResponse",

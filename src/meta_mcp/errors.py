@@ -17,6 +17,7 @@ class McpErrorCode(str, Enum):
     CONFLICT = "CONFLICT"
     REMOTE_5XX = "REMOTE_5XX"
     UNSUPPORTED = "UNSUPPORTED"
+    INTERNAL = "INTERNAL"
 
 
 class McpError(BaseModel):
@@ -28,7 +29,7 @@ class McpError(BaseModel):
     retry_after: float | None = Field(default=None, description="Retry hint in seconds")
 
     def to_dict(self) -> dict[str, Any]:
-        payload = {
+        payload: dict[str, Any] = {
             "code": self.code.value,
             "message": self.message,
         }

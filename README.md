@@ -1,14 +1,38 @@
 # Meta Graph MCP Server
 
-Agent-first Meta Graph + Marketing API integration implemented as an [OpenAI MCP](https://github.com/modelcontextprotocol) server with a companion Python SDK. The project exposes a production-ready surface area that mirrors the Meta Graph and Marketing API endpoints needed for research, insights, publishing, ad creation, and webhook-driven workflows.
+[![CI](https://github.com/jpalvarezb/meta_graph_mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/jpalvarezb/meta_graph_mcp/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+Agents can't safely automate Meta's ads and content APIs without OAuth, rate limiting, PPCA enforcement, and webhook handling. This MCP server packages all of that into a typed tool surface any LLM agent can call, plus a Python SDK for direct use.
+
+Built as an [OpenAI MCP](https://github.com/modelcontextprotocol) server, it exposes a production-ready surface area covering research, insights, publishing, ad creation, and webhook-driven workflows against the Meta Graph and Marketing APIs.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Agent["LLM Agent"]
+    SDK["Python SDK<br/><code>mcp_meta_sdk</code>"]
+    MCP["MCP Server<br/><code>meta_mcp</code>"]
+    Tokens["Token Store<br/>SQLite"]
+    Client["httpx client<br/>retry · rate-limit · batch"]
+    Meta["Meta Graph API"]
+    Webhooks["Webhook Ingress<br/>signature verify · normalize"]
+
+    Agent -- "Streamable HTTP / stdio" --> MCP
+    SDK -- "Streamable HTTP" --> MCP
+    MCP --> Tokens
+    MCP --> Client
+    Client --> Meta
+    Webhooks -- "POST /webhooks/meta" --> MCP
+```
 
 ## Highlights
-- Async MCP server with strict typing, structured logging, and SQLite-backed persistence for tokens, webhooks, idempotency, and background jobs.
-- Resilient Meta Graph HTTP client using `httpx` with retry/backoff, per-token and global rate limiting, batching, and pagination helpers.
-- Comprehensive tool surface covering research, insights, assets, publishing, and ads operations with PPCA enforcement, IG Business checks, and IG publish caps.
-- Lightweight in-process queue for webhook normalization plus webhook signature verification and delivery persistence.
-- Thin async SDK (`mcp_meta_sdk`) that connects to the MCP server via Streamable HTTP, offering typed wrappers for every tool and high-level helpers (IG publish workflow, scheduled page post, ads campaign stack, insights reporting, ad library search).
-- Batteries-included developer experience: Alembic migrations, pytest + respx tests, Ruff/Black/Mypy linting, GitHub Actions CI, Docker multi-stage build with distroless runtime, and runnable examples.
+- **Typed MCP tool surface** — research, insights, assets, publishing, and ads operations with PPCA enforcement, IG Business checks, and publish caps.
+- **Resilient HTTP client** — `httpx` with retry/backoff, per-token and global rate limiting, batching, and pagination.
+- **Async SDK** — `mcp_meta_sdk` connects via Streamable HTTP with typed wrappers and high-level helpers (IG publish, scheduled posts, campaign stack, insights, ad library search).
+- **Batteries included** — Alembic migrations, pytest + respx tests, Ruff/Black/Mypy CI, Docker multi-stage build, and runnable examples.
 
 ## Repository Layout
 ```
@@ -25,7 +49,6 @@ meta_graph_mcp/
 
 ## Prerequisites
 - Python 3.11+
-- `pipx` or `poetry`/`uv` for environment management (optional)
 - Meta app credentials with required Graph/Marketing API scopes
 - SQLite (bundled) or alternative DB supported by SQLAlchemy if you customise `META_MCP_DATABASE_URL`
 
@@ -43,6 +66,8 @@ meta_graph_mcp/
    cp .env.example .env
    # edit values
    ```
+   You must supply credentials for your own Meta App. Create one (or use an existing one) at [developers.facebook.com](https://developers.facebook.com), then copy the App ID and App Secret from the app's **Settings → Basic** page. Generate the appropriate access tokens for whichever surface you need (Page, Instagram Business, Ad Account, or System User) and add them here.
+
    Required values:
    - `META_MCP_APP_ID` / `META_MCP_APP_SECRET`
    - `META_MCP_VERIFY_TOKEN`
@@ -51,6 +76,7 @@ meta_graph_mcp/
      - Instagram: `instagram_basic`, `instagram_manage_insights`, `instagram_content_publish`, `instagram_manage_comments`, `pages_show_list`, `business_management`
      - Ads: `ads_management`, `ads_read`, `business_management`
      - PPCA where required (`page_public_content_access`)
+
 3. **Run database migrations**
    ```bash
    alembic upgrade head
@@ -83,6 +109,7 @@ meta_graph_mcp/
 
    asyncio.run(main())
    ```
+6. **User authentication** — see [docs/AUTH.md](docs/AUTH.md) for the OAuth login flow.
 
 ## Docker
 Multi-stage Dockerfile (Alpine builder + distroless runtime) available at `docker/Dockerfile`.
@@ -92,16 +119,7 @@ Multi-stage Dockerfile (Alpine builder + distroless runtime) available at `docke
 docker build -t meta-mcp:latest -f docker/Dockerfile .
 
 # Run (env file contains credentials/tokens)
- docker run --rm -p 8000:8000 --env-file .env meta-mcp:latest meta-mcp-server --transport streamable-http
-```
-
-## GitHub Actions CI
-`.github/workflows/ci.yml` runs linting (Ruff/Black), typing (mypy), tests (pytest with coverage ≥90%), and builds the Docker image. The workflow mirrors the local developer commands:
-```bash
-ruff check src tests
-black --check src tests
-mypy src tests
-pytest --cov=meta_mcp --cov-report=term-missing --cov=mcp_meta_sdk
+docker run --rm -p 8000:8000 --env-file .env meta-mcp:latest meta-mcp-server --transport streamable-http
 ```
 
 ## Webhooks
@@ -140,18 +158,19 @@ Tool input/output schemas are generated from the Pydantic models into the `schem
 ## Testing
 - Unit tests: `pytest`
 - Async HTTP and retry behaviour: `pytest-asyncio` + `respx`
-- Coverage enforced at ≥90% on `meta_mcp` and `mcp_meta_sdk`
+- Coverage enforced at ≥60% on `meta_mcp` and `mcp_meta_sdk`
 
 Run locally:
 ```bash
 pytest --cov=meta_mcp --cov-report=term-missing --cov=mcp_meta_sdk
 ```
 
-## Development Tasks
-- `make lint` / `make format` (optional Makefile) or run tooling manually
-- `ruff check src tests`
-- `black src tests`
-- `mypy src tests`
+## Development
+```bash
+ruff check src tests
+black src tests
+mypy src tests
+```
 
 ## Production Notes
 - Configure PPCA via App Review
@@ -159,23 +178,5 @@ pytest --cov=meta_mcp --cov-report=term-missing --cov=mcp_meta_sdk
 - Monitor `x-business-use-case-usage` / `x-app-usage` headers surfaced in tool responses
 - Manage idempotency keys when creating media/assets/ads
 
----
-Questions or contributions? Open an issue or PR in the internal repo.
-
-## User Login Flow
-1. Call `auth.login.begin` (or `MetaMcpSdk.auth_login_begin`) with the scopes you need. This returns an authorization URL and state token. Redirect the user to the URL.
-2. Your redirect handler receives the authorization `code` and `state`.
-3. Call `auth.login.complete` (or `MetaMcpSdk.auth_login_complete`) with the code and optional expected state. The server exchanges the code for an access token, validates required scopes via `/debug_token`, and persists the token metadata in SQLite.
-4. The tool response returns the access token, subject info, and scopes. Store the returned values or rely on the MCP `tokens` table for subsequent calls.
-
-All login helpers honour `META_MCP_FACEBOOK_OAUTH_BASE_URL` and `META_MCP_OAUTH_REDIRECT_URI`, making it easy to switch between staging and production apps.
-
-### SDK Example
-```python
-from meta_mcp.meta_client import AuthLoginBeginRequest, AuthLoginCompleteRequest
-
-begin = await sdk.auth_login_begin(AuthLoginBeginRequest(scopes=["pages_manage_posts"]))
-print(begin.authorization_url)
-complete = await sdk.auth_login_complete(AuthLoginCompleteRequest(code=code, expected_state=begin.state))
-print(complete.access_token)
-```
+## License
+[MIT](LICENSE)

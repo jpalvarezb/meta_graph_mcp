@@ -36,15 +36,15 @@ def test_settings(tmp_path):
 @pytest.mark.asyncio
 async def test_server_creates_successfully(test_settings):
     """Test that the server can be created with all tools registered.
-    
+
     This is the CRITICAL test - if this fails, nothing else works!
     """
     server = create_server(test_settings)
-    
+
     # Verify server is created
     assert server is not None
     assert server.name == "meta-mcp"
-    
+
     # Just verify the server was created successfully
     # The fact that create_server() didn't raise an exception means:
     # - All tool modules loaded
@@ -58,7 +58,7 @@ async def test_server_creates_successfully(test_settings):
 @respx.mock
 async def test_oauth_login_complete_workflow(test_settings):
     """Test the COMPLETE OAuth login workflow end-to-end.
-    
+
     This is THE workflow all users go through:
     1. User calls auth.login.begin
     2. System returns authorization URL
@@ -67,14 +67,14 @@ async def test_oauth_login_complete_workflow(test_settings):
     5. User calls auth.login.complete with code
     6. System exchanges code for access token
     7. System validates token and stores it
-    
+
     If this fails, users can't even get started!
     """
     server = create_server(test_settings)
-    
+
     # Access the tool handlers directly from the server's registered tools
     # We'll call them through the tool decorator interface
-    
+
     # Step 1: Begin OAuth flow
     # We need to directly test the tool handlers that were registered
     # For now, we'll test using the existing test approach from test_auth_login.py
@@ -86,8 +86,9 @@ async def test_oauth_login_complete_workflow(test_settings):
     from meta_mcp.meta_client import MetaGraphApiClient
     from meta_mcp.meta_client.auth import TokenService
     from meta_mcp.storage.queue import WebhookEventQueue
+
     get_settings.cache_clear()  # Clear any cached settings
-    
+
     # Create client that will use test_settings
     client = MetaGraphApiClient()
     # Override the client's settings with test_settings
@@ -98,7 +99,7 @@ async def test_oauth_login_complete_workflow(test_settings):
         timeout=httpx.Timeout(test_settings.default_timeout_seconds),
         headers={"Accept": "application/json"},
     )
-    
+
     token_service = TokenService(client)
     event_queue = WebhookEventQueue()
     env = ToolEnvironment(
@@ -107,42 +108,41 @@ async def test_oauth_login_complete_workflow(test_settings):
         token_service=token_service,
         event_queue=event_queue,
     )
-    
+
     # Create a stub server to register tools
     class _StubServer:
         def __init__(self):
             self.tools = {}
-        
+
         def tool(self, name: str, structured_output: bool = True, **kwargs):
             def decorator(fn):
                 self.tools[name] = fn
                 return fn
+
             return decorator
-    
+
     stub_server = _StubServer()
     auth_login.register(stub_server, env)
-    
-    begin_request = AuthLoginBeginRequest(
-        scopes=["pages_manage_posts", "pages_read_engagement"]
-    )
-    
+
+    begin_request = AuthLoginBeginRequest(scopes=["pages_manage_posts", "pages_read_engagement"])
+
     begin_result = await stub_server.tools["auth.login.begin"](begin_request, None)
-    
+
     # Verify we got an authorization URL
     assert begin_result["ok"] is True
     assert "data" in begin_result
     assert "authorization_url" in begin_result["data"]
     assert "state" in begin_result["data"]
-    
+
     auth_url = begin_result["data"]["authorization_url"]
     state = begin_result["data"]["state"]
-    
+
     # Verify URL is correct
     assert "oauth.example.com" in auth_url
     assert "pages_manage_posts" in auth_url
     assert "pages_read_engagement" in auth_url
     assert state in auth_url
-    
+
     # Step 2: Mock Meta's token exchange endpoint
     respx.get("https://test.example.com/v18.0/oauth/access_token").mock(
         return_value=httpx.Response(
@@ -154,7 +154,7 @@ async def test_oauth_login_complete_workflow(test_settings):
             },
         )
     )
-    
+
     # Step 3: Mock the debug_token endpoint (validates the token)
     respx.get("https://test.example.com/v18.0/debug_token").mock(
         return_value=httpx.Response(
@@ -172,7 +172,7 @@ async def test_oauth_login_complete_workflow(test_settings):
             },
         )
     )
-    
+
     # Step 4: Complete OAuth flow with the code
     # In real workflow: Meta redirects back with code and state
     # We simulate that by passing state back
@@ -181,17 +181,17 @@ async def test_oauth_login_complete_workflow(test_settings):
         state=state,  # Meta echoes this back
         expected_state=state,  # We verify it matches
     )
-    
+
     complete_result = await stub_server.tools["auth.login.complete"](complete_request, None)
-    
+
     # Cleanup
     await client.aclose()
-    
-    # Verify we got the access token back  
+
+    # Verify we got the access token back
     # Debug: print if failed
     if complete_result["ok"] is not True:
         print(f"FAILED: {complete_result}")
-    
+
     assert complete_result["ok"] is True
     assert "data" in complete_result
     assert complete_result["data"]["access_token"] == "user_access_token_123"
@@ -200,7 +200,7 @@ async def test_oauth_login_complete_workflow(test_settings):
     assert complete_result["data"]["subject_id"] == "123456789"
     assert complete_result["data"]["app_id"] == "test_app_id"
     assert set(complete_result["data"]["scopes"]) == {"pages_manage_posts", "pages_read_engagement"}
-    
+
     # Verify metadata in response
     assert "meta" in complete_result
     assert complete_result["meta"]["token_subject_id"] == "123456789"

@@ -23,20 +23,20 @@ This test validates the complete OAuth flow against the LIVE Meta API:
    ```
 
 2. Manually generate an authorization code:
-   
+
    a) Run the test in "URL generation mode" to get your authorization URL:
       ```bash
       pytest tests/test_integration_auth_manual.py::test_generate_authorization_url -v
       ```
-   
+
    b) Copy the authorization URL from the test output
-   
+
    c) Visit the URL in your browser while logged into Facebook/Meta as a developer on your app
-   
+
    d) Grant the requested permissions
-   
+
    e) Meta will redirect to your redirect_uri with a `code` parameter in the URL
-   
+
    f) Copy the `code` value from the URL
 
 3. Run the full integration test with your authorization code:
@@ -112,21 +112,23 @@ class _StubServer:
 @pytest.fixture
 async def integration_settings(tmp_path) -> AsyncIterator[MetaMcpSettings]:
     """Create settings using real Meta app credentials from environment.
-    
+
     This fixture loads actual credentials but uses a temporary test database.
     """
     # Load from environment or .env.integration file
     app_id = os.environ.get("META_MCP_APP_ID")
     app_secret = os.environ.get("META_MCP_APP_SECRET")
-    redirect_uri = os.environ.get("META_MCP_OAUTH_REDIRECT_URI", "http://localhost:8000/oauth/callback")
+    redirect_uri = os.environ.get(
+        "META_MCP_OAUTH_REDIRECT_URI", "http://localhost:8000/oauth/callback"
+    )
     verify_token = os.environ.get("META_MCP_VERIFY_TOKEN", "test_verify_token")
-    
+
     if not app_id or not app_secret:
         pytest.skip("META_MCP_APP_ID and META_MCP_APP_SECRET must be set for integration tests")
-    
+
     # Use temporary database for testing
     db_path = tmp_path / "integration_test.db"
-    
+
     settings = MetaMcpSettings(
         app_id=app_id,
         app_secret=app_secret,
@@ -139,16 +141,16 @@ async def integration_settings(tmp_path) -> AsyncIterator[MetaMcpSettings]:
         max_retries=2,  # Allow some retries for real network calls
         default_timeout_seconds=30.0,
     )
-    
+
     # Override global settings for this test
     os.environ["META_MCP_DATABASE_URL"] = str(settings.database_url)
     get_settings.cache_clear()
-    
+
     # Initialize database
     await init_models()
-    
+
     yield settings
-    
+
     # Cleanup
     get_settings.cache_clear()
     os.environ.pop("META_MCP_DATABASE_URL", None)
@@ -160,16 +162,16 @@ async def integration_env(integration_settings: MetaMcpSettings) -> AsyncIterato
     client = MetaGraphApiClient()
     token_service = TokenService(client)
     event_queue = WebhookEventQueue()
-    
+
     env = ToolEnvironment(
         settings=integration_settings,
         client=client,
         token_service=token_service,
         event_queue=event_queue,
     )
-    
+
     yield env
-    
+
     # Cleanup
     await client.aclose()
 
@@ -177,16 +179,16 @@ async def integration_env(integration_settings: MetaMcpSettings) -> AsyncIterato
 @pytest.mark.asyncio
 async def test_generate_authorization_url(integration_env: ToolEnvironment) -> None:
     """Generate an authorization URL for manual testing.
-    
+
     Run this test to get the URL you need to visit to obtain an authorization code:
-    
+
         pytest tests/test_integration_auth_manual.py::test_generate_authorization_url -v -s
-    
+
     The URL will be printed to stdout. Visit it in your browser to grant permissions.
     """
     server = _StubServer()
     auth_login.register(server, integration_env)
-    
+
     # Request common permissions for testing
     request = AuthLoginBeginRequest(
         scopes=[
@@ -195,17 +197,17 @@ async def test_generate_authorization_url(integration_env: ToolEnvironment) -> N
             "pages_read_user_content",
         ]
     )
-    
+
     handler = server.tools["auth.login.begin"]
     result = await handler(request, None)
-    
+
     assert result["ok"] is True
     assert "authorization_url" in result["data"]
     assert "state" in result["data"]
-    
+
     auth_url = result["data"]["authorization_url"]
     state = result["data"]["state"]
-    
+
     # Print the URL for the user to visit
     print("\n" + "=" * 80)
     print("AUTHORIZATION URL GENERATED")
@@ -215,7 +217,7 @@ async def test_generate_authorization_url(integration_env: ToolEnvironment) -> N
     print("After granting permissions, copy the 'code' parameter from the redirect URL.")
     print(f"\nState value (for verification): {state}")
     print("=" * 80)
-    
+
     # Verify URL structure
     assert integration_env.settings.facebook_oauth_base_url in auth_url
     assert str(integration_env.settings.app_id) in auth_url
@@ -247,92 +249,99 @@ async def test_oauth_login_integration(integration_env: ToolEnvironment) -> None
             "INTEGRATION_TEST_AUTH_CODE environment variable must be set. "
             "Run test_generate_authorization_url first to get a code."
         )
-    
+
     print(f"\n{'=' * 80}")
     print("RUNNING INTEGRATION TEST WITH REAL META API")
     print(f"{'=' * 80}")
     print(f"App ID: {integration_env.settings.app_id}")
     print(f"Using auth code: {auth_code[:10]}...")
     print(f"{'=' * 80}\n")
-    
+
     # Set up tool server
     server = _StubServer()
     auth_login.register(server, integration_env)
     core.register(server, integration_env)
-    
+
     # Step 1: Complete OAuth flow with real authorization code
     print("Step 1: Exchanging authorization code for access token...")
     complete_request = AuthLoginCompleteRequest(
         code=auth_code,
         redirect_uri=integration_env.settings.oauth_redirect_uri,
     )
-    
+
     complete_handler = server.tools["auth.login.complete"]
     complete_result = await complete_handler(complete_request, None)
-    
+
     # Verify successful token exchange
     if not complete_result["ok"]:
         print(f"\n❌ OAuth completion failed: {complete_result}")
-        pytest.fail(f"OAuth flow failed: {complete_result.get('error', {}).get('message', 'Unknown error')}")
-    
+        pytest.fail(
+            f"OAuth flow failed: {complete_result.get('error', {}).get('message', 'Unknown error')}"
+        )
+
     assert complete_result["ok"] is True, "OAuth completion should succeed"
     assert "data" in complete_result
     assert "access_token" in complete_result["data"]
-    
+
     access_token = complete_result["data"]["access_token"]
     subject_id = complete_result["data"].get("subject_id")
     scopes = complete_result["data"].get("scopes", [])
-    
+
     print(f"✓ Received access token (length: {len(access_token)})")
     print(f"✓ Subject ID: {subject_id}")
     print(f"✓ Scopes: {', '.join(scopes)}")
-    
+
     # Step 2: Verify token was persisted to database
     print("\nStep 2: Verifying token persistence in database...")
-    
+
     async with session_scope() as session:
         stmt = select(Token)
         result = await session.execute(stmt)
         tokens = list(result.scalars().all())
-        
+
         assert len(tokens) == 1, "Exactly one token should be in database"
-        
+
         stored_token = tokens[0]
         assert stored_token.subject_id == subject_id
         assert stored_token.app_id == integration_env.settings.app_id
         assert len(stored_token.scopes) > 0
-        assert stored_token.expires_at is None or stored_token.expires_at > datetime.now(stored_token.expires_at.tzinfo)
-        
+        assert stored_token.expires_at is None or stored_token.expires_at > datetime.now(
+            stored_token.expires_at.tzinfo
+        )
+
         print(f"✓ Token persisted with hash: {stored_token.id[:16]}...")
         print(f"✓ Token type: {stored_token.type.value}")
         print(f"✓ Scopes in DB: {', '.join(stored_token.scopes)}")
         if stored_token.expires_at:
             print(f"✓ Expires at: {stored_token.expires_at.isoformat()}")
-    
+
     # Step 3: Use the token to make a real API call
     print("\nStep 3: Testing token with real API call to /me...")
-    
+
     # Use the graph.request tool to call /me
     graph_request = GraphRequestInput(
         method="GET",
         path=f"/{integration_env.settings.graph_api_version}/me",
         query={"fields": "id,name"},
     )
-    
+
     # Create a mock context with the access token
     class _MockContext:
         class _RequestContext:
             class _Request:
                 class _Params:
                     arguments = {}
+
                 params = _Params()
+
             request = _Request()
             meta = None
+
         request_context = _RequestContext()
-    
+
     # We need to pass the token through the context - let's do it via arguments instead
     graph_request_dict = graph_request.model_dump()
-    
+
     # For this test, we'll use the client directly since we have the token
     print("   Making API call to /me endpoint...")
     response = await integration_env.client.request(
@@ -341,18 +350,18 @@ async def test_oauth_login_integration(integration_env: ToolEnvironment) -> None
         path=f"/{integration_env.settings.graph_api_version}/me",
         query={"fields": "id,name"},
     )
-    
+
     assert response.status_code == 200, f"API call should succeed, got {response.status_code}"
-    
+
     me_data = response.json()
     assert "id" in me_data
     assert me_data["id"] == subject_id
-    
+
     print("✓ Successfully called /me endpoint")
     print(f"✓ User ID: {me_data['id']}")
     if "name" in me_data:
         print(f"✓ User name: {me_data['name']}")
-    
+
     print(f"\n{'=' * 80}")
     print("✅ INTEGRATION TEST PASSED - ALL VALIDATIONS SUCCESSFUL")
     print(f"{'=' * 80}\n")
@@ -361,25 +370,25 @@ async def test_oauth_login_integration(integration_env: ToolEnvironment) -> None
 @pytest.mark.asyncio
 async def test_token_validation_with_real_api(integration_env: ToolEnvironment) -> None:
     """Test token validation against real Meta API.
-    
+
     This test can use either:
     1. A fresh authorization code (from INTEGRATION_TEST_AUTH_CODE)
     2. Or an existing access token (from INTEGRATION_TEST_ACCESS_TOKEN)
-    
+
     This is useful for testing token validation logic without going through the full OAuth flow.
     """
     # Try to get either an auth code or existing access token
     auth_code = os.environ.get("INTEGRATION_TEST_AUTH_CODE")
     access_token = os.environ.get("INTEGRATION_TEST_ACCESS_TOKEN")
-    
+
     if not auth_code and not access_token:
         pytest.skip(
             "Either INTEGRATION_TEST_AUTH_CODE or INTEGRATION_TEST_ACCESS_TOKEN must be set"
         )
-    
+
     server = _StubServer()
     auth_login.register(server, integration_env)
-    
+
     # If we have a code, exchange it for a token first
     if auth_code and not access_token:
         print("Exchanging auth code for access token...")
@@ -389,16 +398,14 @@ async def test_token_validation_with_real_api(integration_env: ToolEnvironment) 
         )
         complete_handler = server.tools["auth.login.complete"]
         complete_result = await complete_handler(complete_request, None)
-        
+
         assert complete_result["ok"] is True
         access_token = complete_result["data"]["access_token"]
-    
+
     # Now test token validation
     print("\nValidating token against Meta API...")
-    metadata = await integration_env.token_service.inspect_token(
-        access_token=access_token
-    )
-    
+    metadata = await integration_env.token_service.inspect_token(access_token=access_token)
+
     print("✓ Token is valid")
     print(f"✓ App ID: {metadata.app_id}")
     print(f"✓ Subject ID: {metadata.subject_id}")
@@ -409,10 +416,10 @@ async def test_token_validation_with_real_api(integration_env: ToolEnvironment) 
         print(f"✓ Expires at: {metadata.expires_at.isoformat()}")
     else:
         print("✓ Token does not expire (long-lived)")
-    
+
     # Verify token metadata
     assert metadata.app_id == integration_env.settings.app_id
     assert len(metadata.scopes) > 0
     assert not metadata.is_expired
-    
+
     print("\n✅ Token validation successful")

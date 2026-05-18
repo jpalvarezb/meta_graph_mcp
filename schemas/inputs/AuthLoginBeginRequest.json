@@ -16,11 +16,19 @@
       "title": "Redirect Uri"
     },
     "scopes": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Scopes",
-      "type": "array"
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scopes"
     },
     "state": {
       "anyOf": [
@@ -35,9 +43,6 @@
       "title": "State"
     }
   },
-  "required": [
-    "scopes"
-  ],
   "title": "AuthLoginBeginRequest",
   "type": "object"
 }

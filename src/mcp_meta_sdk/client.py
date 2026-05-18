@@ -33,7 +33,9 @@ from meta_mcp.meta_client import (
     AssetsVideoUploadFinish,
     AssetsVideoUploadInit,
     AdLibrarySearch,
-    GraphRequestInput, PermissionsCheckRequest, EventsDequeueRequest,
+    GraphRequestInput,
+    PermissionsCheckRequest,
+    EventsDequeueRequest,
     InsightsAdsAccount,
     PagesPostsPublish,
     PagePhotosCreate,
@@ -84,6 +86,7 @@ class ToolExecutionError(ToolResponseError):
         self.code = code
         self.details = error.get("details")
         self.retry_after = error.get("retry_after")
+
 
 class MetaMcpSdk:
     """Thin async SDK wrapping MCP tool calls exposed by the Meta server."""
@@ -157,10 +160,14 @@ class MetaMcpSdk:
 
     def _require_session(self) -> ClientSession:
         if self._session is None:
-            raise RuntimeError("SDK is not connected. Call connect() first or use async context manager.")
+            raise RuntimeError(
+                "SDK is not connected. Call connect() first or use async context manager."
+            )
         return self._session
 
-    def _normalize_arguments(self, arguments: BaseModel | Mapping[str, Any] | None) -> dict[str, Any] | None:
+    def _normalize_arguments(
+        self, arguments: BaseModel | Mapping[str, Any] | None
+    ) -> dict[str, Any] | None:
         if arguments is None:
             return None
         if isinstance(arguments, BaseModel):
@@ -211,7 +218,9 @@ class MetaMcpSdk:
     # --- Typed wrappers -------------------------------------------------
 
     async def auth_permissions_check(self, access_token: str) -> PermissionsCheckResponse:
-        response = await self.call_tool_raw("auth.permissions.check", PermissionsCheckRequest(access_token=access_token))
+        response = await self.call_tool_raw(
+            "auth.permissions.check", PermissionsCheckRequest(access_token=access_token)
+        )
         return PermissionsCheckResponse.model_validate(response.data)
 
     async def events_dequeue(self, max_events: int = 50) -> EventsDequeueResponse:
@@ -222,23 +231,31 @@ class MetaMcpSdk:
         response = await self.call_tool_raw("auth.login.begin", request)
         return AuthLoginBeginResponse.model_validate(response.data)
 
-    async def auth_login_complete(self, request: AuthLoginCompleteRequest) -> AuthLoginCompleteResponse:
+    async def auth_login_complete(
+        self, request: AuthLoginCompleteRequest
+    ) -> AuthLoginCompleteResponse:
         response = await self.call_tool_raw("auth.login.complete", request)
         return AuthLoginCompleteResponse.model_validate(response.data)
 
     async def graph_request(self, request: GraphRequestInput) -> ToolResponse:
         return await self.call_tool_raw("graph.request", request)
 
-    async def research_public_pages_posts(self, request: ResearchPublicPagesPostsList) -> ToolResponse:
+    async def research_public_pages_posts(
+        self, request: ResearchPublicPagesPostsList
+    ) -> ToolResponse:
         return await self.call_tool_raw("research.public_pages.posts.list", request)
 
-    async def research_public_pages_comments(self, request: ResearchPublicPagesPostCommentsList) -> ToolResponse:
+    async def research_public_pages_comments(
+        self, request: ResearchPublicPagesPostCommentsList
+    ) -> ToolResponse:
         return await self.call_tool_raw("research.public_pages.post_comments.list", request)
 
     async def research_public_ig_media(self, request: ResearchPublicIgMediaList) -> ToolResponse:
         return await self.call_tool_raw("research.public_ig.media.list", request)
 
-    async def research_public_ig_media_comments(self, request: ResearchPublicIgMediaCommentsList) -> ToolResponse:
+    async def research_public_ig_media_comments(
+        self, request: ResearchPublicIgMediaCommentsList
+    ) -> ToolResponse:
         return await self.call_tool_raw("research.public_ig.media_comments.list", request)
 
     async def research_object_reactions(self, request: ResearchObjectReactions) -> ToolResponse:
@@ -268,7 +285,9 @@ class MetaMcpSdk:
     async def assets_video_upload_finish(self, request: AssetsVideoUploadFinish) -> ToolResponse:
         return await self.call_tool_raw("assets.video.upload.finish", request)
 
-    async def assets_video_subtitles_upload(self, request: AssetsVideoSubtitlesUpload) -> ToolResponse:
+    async def assets_video_subtitles_upload(
+        self, request: AssetsVideoSubtitlesUpload
+    ) -> ToolResponse:
         return await self.call_tool_raw("assets.video.subtitles.upload", request)
 
     async def ig_media_create_tool(self, request: IgMediaCreate) -> ToolResponse:
@@ -333,7 +352,9 @@ class MetaMcpSdk:
     ) -> dict[str, Any]:
         creation_response = await self.call_tool_raw(
             "ig.media.create",
-            IgMediaCreate(ig_user_id=ig_user_id, media_type="IMAGE", image_url=image_url, caption=caption),
+            IgMediaCreate(
+                ig_user_id=ig_user_id, media_type="IMAGE", image_url=image_url, caption=caption
+            ),
         )
         creation_data = creation_response.data or {}
         creation_id = creation_data.get("data", {}).get("id")
@@ -386,7 +407,9 @@ class MetaMcpSdk:
         if not campaign_id:
             raise ToolResponseError("Campaign creation missing id", response=campaign_resp)
 
-        adset_payload = adset.model_copy(update={"spec": {**adset.spec, "campaign_id": campaign_id}})
+        adset_payload = adset.model_copy(
+            update={"spec": {**adset.spec, "campaign_id": campaign_id}}
+        )
         adset_resp = await self.ads_adsets_create(adset_payload)
         adset_id = (adset_resp.data or {}).get("data", {}).get("id")
         if not adset_id:
@@ -397,7 +420,11 @@ class MetaMcpSdk:
         if not creative_id:
             raise ToolResponseError("Creative creation missing id", response=creative_resp)
 
-        ad_payload = ad.model_copy(update={"spec": {**ad.spec, "adset_id": adset_id, "creative": {"creative_id": creative_id}}})
+        ad_payload = ad.model_copy(
+            update={
+                "spec": {**ad.spec, "adset_id": adset_id, "creative": {"creative_id": creative_id}}
+            }
+        )
         ad_resp = await self.ads_ads_create(ad_payload)
 
         return {

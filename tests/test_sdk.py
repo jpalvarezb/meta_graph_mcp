@@ -16,7 +16,9 @@ class DummySession:
         self.factory = factory
         self.calls: list[tuple[str, dict[str, Any] | None]] = []
 
-    async def call_tool(self, name: str, arguments: dict[str, Any] | None = None, **_: Any) -> types.CallToolResult:
+    async def call_tool(
+        self, name: str, arguments: dict[str, Any] | None = None, **_: Any
+    ) -> types.CallToolResult:
         self.calls.append((name, arguments))
         return types.CallToolResult(content=[], structuredContent=self.factory(name), isError=False)
 
@@ -57,11 +59,33 @@ async def test_publish_ig_image_requires_creation_id(monkeypatch) -> None:
 
 @pytest.mark.asyncio
 async def test_sdk_auth_login_methods() -> None:
-    begin_payload = {"ok": True, "data": {"authorization_url": "https://example.com/oauth", "state": "state123", "redirect_uri": "https://client.example.com/callback", "scopes": ["pages_manage_posts"]}, "meta": {}}
-    complete_payload = {"ok": True, "data": {"access_token": "token123", "token_type": "bearer", "expires_at": "2024-01-01T00:00:00+00:00", "app_id": "app", "subject_id": "sub", "scopes": ["pages_manage_posts"]}, "meta": {}}
+    begin_payload = {
+        "ok": True,
+        "data": {
+            "authorization_url": "https://example.com/oauth",
+            "state": "state123",
+            "redirect_uri": "https://client.example.com/callback",
+            "scopes": ["pages_manage_posts"],
+        },
+        "meta": {},
+    }
+    complete_payload = {
+        "ok": True,
+        "data": {
+            "access_token": "token123",
+            "token_type": "bearer",
+            "expires_at": "2024-01-01T00:00:00+00:00",
+            "app_id": "app",
+            "subject_id": "sub",
+            "scopes": ["pages_manage_posts"],
+        },
+        "meta": {},
+    }
     sdk = MetaMcpSdk(base_url="http://localhost")
     sdk._session = DummySession(lambda name: begin_payload if name == "auth.login.begin" else complete_payload)  # type: ignore[assignment]
-    begin_response = await sdk.auth_login_begin(AuthLoginBeginRequest(scopes=["pages_manage_posts"]))
+    begin_response = await sdk.auth_login_begin(
+        AuthLoginBeginRequest(scopes=["pages_manage_posts"])
+    )
     assert str(begin_response.authorization_url) == "https://example.com/oauth"
     complete_response = await sdk.auth_login_complete(AuthLoginCompleteRequest(code="CODE"))
     assert complete_response.access_token == "token123"

@@ -6,7 +6,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 from typing import Any
 
-__all__: list[str] = []
+_exports: list[str] = []
 
 
 def _export_module(module_name: str) -> None:
@@ -16,7 +16,7 @@ def _export_module(module_name: str) -> None:
         exports = [name for name in dir(module) if not name.startswith("_")]
     for name in exports:
         globals()[name] = getattr(module, name)
-    __all__.extend(exports)
+    _exports.extend(exports)
 
 
 for module_info in iter_modules(__path__):  # type: ignore[name-defined]
@@ -31,4 +31,4 @@ def __getattr__(name: str) -> Any:  # pragma: no cover
     raise AttributeError(name)
 
 
-__all__ = tuple(__all__)
+__all__ = tuple(_exports)

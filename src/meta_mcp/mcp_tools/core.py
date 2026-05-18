@@ -6,7 +6,7 @@ from typing import Mapping
 
 from mcp.server.fastmcp import Context, FastMCP
 
-from ..errors import MCPException, McpError, McpErrorCode
+from ..errors import MCPException
 from ..logging import get_logger
 from ..meta_client import (
     EventsDequeueRequest,
@@ -15,7 +15,6 @@ from ..meta_client import (
     PermissionsCheckRequest,
     PermissionsCheckResponse,
 )
-from ..meta_client.models import ToolResponse
 from .common import ToolEnvironment, ensure_scopes, failure, perform_graph_call, success
 
 logger = get_logger(__name__)
@@ -24,7 +23,11 @@ logger = get_logger(__name__)
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     """Register core tool handlers."""
 
-    @server.tool(name="graph.request", structured_output=True, description="Make a raw Facebook Graph API request.")
+    @server.tool(
+        name="graph.request",
+        structured_output=True,
+        description="Make a raw Facebook Graph API request.",
+    )
     async def graph_request(args: GraphRequestInput, ctx: Context) -> Mapping[str, object]:
         try:
             use_cache = args.method.upper() == "GET"
@@ -42,8 +45,14 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="auth.permissions.check", structured_output=True, description="Check the permissions and validity of the current access token.")
-    async def permissions_check(args: PermissionsCheckRequest, ctx: Context) -> Mapping[str, object]:
+    @server.tool(
+        name="auth.permissions.check",
+        structured_output=True,
+        description="Check the permissions and validity of the current access token.",
+    )
+    async def permissions_check(
+        args: PermissionsCheckRequest, ctx: Context
+    ) -> Mapping[str, object]:
         try:
             access_token, metadata = await ensure_scopes(
                 env=env,
@@ -67,7 +76,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         except MCPException as exc:
             return failure(exc.error)
 
-    @server.tool(name="events.dequeue", structured_output=True, description="Dequeue received webhook events.")
+    @server.tool(
+        name="events.dequeue",
+        structured_output=True,
+        description="Dequeue received webhook events.",
+    )
     async def events_dequeue(args: EventsDequeueRequest, ctx: Context) -> Mapping[str, object]:
         queue = env.event_queue
         events = await queue.dequeue(maximum=args.max)

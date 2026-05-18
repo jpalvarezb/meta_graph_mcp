@@ -4,11 +4,12 @@ import os
 import sys
 
 # Add the src directory to sys.path for module discovery
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 
 try:
     import pytest_asyncio  # type: ignore  # noqa: F401
+
     pytest_plugins = ("pytest_asyncio",)
 except ModuleNotFoundError:  # pragma: no cover
     pytest_plugins: tuple[str, ...] = tuple()
@@ -47,7 +48,6 @@ async def configure_settings(tmp_path) -> AsyncIterator[None]:
     os.environ.pop("META_MCP_VERIFY_TOKEN", None)
     os.environ.pop("META_MCP_FACEBOOK_OAUTH_BASE_URL", None)
     os.environ.pop("META_MCP_OAUTH_REDIRECT_URI", None)
-
 
 
 def pytest_configure(config) -> None:

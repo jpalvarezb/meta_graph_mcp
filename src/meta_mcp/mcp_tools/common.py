@@ -75,7 +75,9 @@ def compute_idempotency_key(*, method: str, path: str, payload: Mapping[str, Any
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
-def resolve_access_token(ctx: Context, *, provided: str | None = None, settings: MetaMcpSettings | None = None) -> str:
+def resolve_access_token(
+    ctx: Context, *, provided: str | None = None, settings: MetaMcpSettings | None = None
+) -> str:
     if provided:
         return provided
 
@@ -121,8 +123,9 @@ async def ensure_scopes(
     provided_token: str | None = None,
 ) -> tuple[str, TokenMetadata]:
     import traceback
+
     access_token: str | None = None
-    
+
     # First, try to resolve from request context or env
     try:
         access_token = resolve_access_token(ctx, provided=provided_token, settings=env.settings)
@@ -133,9 +136,11 @@ async def ensure_scopes(
                 required_scopes=list(required_scopes)
             )
         except Exception as e:
-            logger.error("error_getting_session_token", error=str(e), traceback=traceback.format_exc())
+            logger.error(
+                "error_getting_session_token", error=str(e), traceback=traceback.format_exc()
+            )
             raise
-    
+
     if not access_token:
         # No token available anywhere, generate auth URL for user
         oauth_client = MetaOAuthClient(env.settings)
@@ -153,7 +158,7 @@ async def ensure_scopes(
                 details={
                     "authorization_url": url,
                     "state": state,
-                    "instructions": "1. Open the URL. 2. Authorize the app. 3. Copy the 'code' from the redirect. 4. Use 'auth.login.complete' with the code."
+                    "instructions": "1. Open the URL. 2. Authorize the app. 3. Copy the 'code' from the redirect. 4. Use 'auth.login.complete' with the code.",
                 },
             )
         )
@@ -221,9 +226,9 @@ async def perform_graph_call(
         "headers": dict(response.headers),
     }
     try:
-        payload['data'] = response.json()
+        payload["data"] = response.json()
     except ValueError:
-        payload['data'] = response.content.decode(errors='ignore')
+        payload["data"] = response.content.decode(errors="ignore")
     return success(payload, meta=response_meta)
 
 

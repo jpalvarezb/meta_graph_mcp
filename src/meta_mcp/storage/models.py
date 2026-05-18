@@ -62,9 +62,7 @@ class Job(Base):
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     next_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    __table_args__ = (
-        CheckConstraint("attempts >= 0", name="ck_jobs_attempts_nonnegative"),
-    )
+    __table_args__ = (CheckConstraint("attempts >= 0", name="ck_jobs_attempts_nonnegative"),)
 
 
 class CalendarNote(Base):
@@ -78,6 +76,7 @@ class CalendarNote(Base):
 
 class SessionToken(Base):
     """Stores raw access tokens for session persistence."""
+
     __tablename__ = "session_tokens"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

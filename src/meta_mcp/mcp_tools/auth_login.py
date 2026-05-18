@@ -41,13 +41,19 @@ DEFAULT_SCOPES = [
 def register(server: FastMCP, env: ToolEnvironment) -> None:
     oauth_client = MetaOAuthClient(env.settings)
 
-    @server.tool(name="auth.login.begin", structured_output=True, description="Start the OAuth login flow to get an authorization URL. If scopes are not provided, defaults to a comprehensive set for Pages, Instagram, and Ads.")
+    @server.tool(
+        name="auth.login.begin",
+        structured_output=True,
+        description="Start the OAuth login flow to get an authorization URL. If scopes are not provided, defaults to a comprehensive set for Pages, Instagram, and Ads.",
+    )
     async def login_begin(args: AuthLoginBeginRequest, ctx: Context) -> Mapping[str, object]:
         del ctx
         redirect_uri = str(args.redirect_uri or env.settings.oauth_redirect_uri)
         state = args.state or generate_state(16)
         scopes = list(args.scopes) if args.scopes is not None else DEFAULT_SCOPES
-        url = oauth_client.build_authorization_url(scopes=scopes, redirect_uri=redirect_uri, state=state)
+        url = oauth_client.build_authorization_url(
+            scopes=scopes, redirect_uri=redirect_uri, state=state
+        )
         response = AuthLoginBeginResponse(
             authorization_url=url,
             state=state,
@@ -56,7 +62,11 @@ def register(server: FastMCP, env: ToolEnvironment) -> None:
         )
         return success(response.model_dump(mode="json"))
 
-    @server.tool(name="auth.login.complete", structured_output=True, description="Complete the OAuth login flow by exchanging the code for a token.")
+    @server.tool(
+        name="auth.login.complete",
+        structured_output=True,
+        description="Complete the OAuth login flow by exchanging the code for a token.",
+    )
     async def login_complete(args: AuthLoginCompleteRequest, ctx: Context) -> Mapping[str, object]:
         del ctx
         if args.expected_state:

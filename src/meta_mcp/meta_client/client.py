@@ -108,7 +108,9 @@ class MetaGraphApiClient:
 
         if use_cache and self._cache and cache_key in self._cache:
             logger.debug("cache_hit", path=path)
-            return self._build_cached_response(method=method, path=path, query=query, cached=self._cache[cache_key])
+            return self._build_cached_response(
+                method=method, path=path, query=query, cached=self._cache[cache_key]
+            )
 
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -338,9 +340,11 @@ class MetaGraphApiClient:
 
     async def debug_token(self, *, access_token: str) -> dict[str, Any]:
         response = await self.request(
-            access_token=self.settings.system_user_access_token.get_secret_value()
-            if self.settings.system_user_access_token
-            else access_token,
+            access_token=(
+                self.settings.system_user_access_token.get_secret_value()
+                if self.settings.system_user_access_token
+                else access_token
+            ),
             method="GET",
             path=f"/{self.settings.graph_api_version}/debug_token",
             query={

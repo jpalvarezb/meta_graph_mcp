@@ -41,7 +41,11 @@ class TokenMetadata:
         if self.expires_at is None:
             return False
         # Ensure expires_at is timezone-aware before comparison
-        expires_at_aware = self.expires_at.replace(tzinfo=timezone.utc) if self.expires_at.tzinfo is None else self.expires_at
+        expires_at_aware = (
+            self.expires_at.replace(tzinfo=timezone.utc)
+            if self.expires_at.tzinfo is None
+            else self.expires_at
+        )
         return datetime.now(timezone.utc) >= expires_at_aware
 
 
@@ -86,7 +90,11 @@ class TokenService:
                 McpError(
                     code=McpErrorCode.AUTH,
                     message="Access token expired",
-                    details={"expires_at": metadata.expires_at.isoformat() if metadata.expires_at else None},
+                    details={
+                        "expires_at": (
+                            metadata.expires_at.isoformat() if metadata.expires_at else None
+                        )
+                    },
                 )
             )
 
@@ -143,7 +151,9 @@ class TokenService:
                 orm_token = Token(
                     id=token_hash,
                     type=token_type,
-                    subject_id=str(debug_info.get("user_id") or debug_info.get("profile_id") or "unknown"),
+                    subject_id=str(
+                        debug_info.get("user_id") or debug_info.get("profile_id") or "unknown"
+                    ),
                     scopes=scopes,
                     app_id=str(debug_info.get("app_id") or ""),
                     issued_at=datetime.now(timezone.utc),
@@ -207,23 +217,24 @@ class TokenService:
         """Retrieve the most recent non-expired token that has all required scopes."""
         now = datetime.now(timezone.utc)
         async with session_scope() as session:
-            stmt = (
-                select(SessionToken)
-                .order_by(desc(SessionToken.issued_at))
-            )
+            stmt = select(SessionToken).order_by(desc(SessionToken.issued_at))
             result = await session.execute(stmt)
             rows = result.scalars().all()
-            
+
             for row in rows:
                 # Skip expired tokens
                 if row.expires_at:
-                    expires_at_aware = row.expires_at.replace(tzinfo=timezone.utc) if row.expires_at.tzinfo is None else row.expires_at
+                    expires_at_aware = (
+                        row.expires_at.replace(tzinfo=timezone.utc)
+                        if row.expires_at.tzinfo is None
+                        else row.expires_at
+                    )
                     if expires_at_aware <= now:
                         continue
                 # Check if token has all required scopes
                 if all(scope in row.scopes for scope in required_scopes):
                     return row.access_token
-            
+
             return None
 
     def _hash_token(self, token: str) -> str:
@@ -233,7 +244,11 @@ class TokenService:
         if token.expires_at is None:
             return False
         # Ensure token.expires_at is timezone-aware before comparison
-        expires_at_aware = token.expires_at.replace(tzinfo=timezone.utc) if token.expires_at.tzinfo is None else token.expires_at
+        expires_at_aware = (
+            token.expires_at.replace(tzinfo=timezone.utc)
+            if token.expires_at.tzinfo is None
+            else token.expires_at
+        )
         return expires_at_aware <= datetime.now(timezone.utc) + timedelta(minutes=5)
 
     def _row_to_metadata(self, row: Token) -> TokenMetadata:

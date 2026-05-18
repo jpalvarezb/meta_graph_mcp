@@ -26,22 +26,29 @@ async def tool_env():
     settings = get_settings()
     client = MetaGraphApiClient()
     token_service = AsyncMock(spec=TokenService)
-    token_service.ensure_permissions.return_value = MagicMock(subject_id="123", type=MagicMock(value="ad_account"))
+    token_service.ensure_permissions.return_value = MagicMock(
+        subject_id="123", type=MagicMock(value="ad_account")
+    )
     event_queue = MagicMock(spec=WebhookEventQueue)
     return ToolEnvironment(settings, client, token_service, event_queue)
+
 
 @pytest.fixture
 def registered_tools(tool_env):
     server = MagicMock()
     tools = {}
+
     def tool_decorator(name=None, **kwargs):
         def wrapper(func):
             tools[name] = func
             return func
+
         return wrapper
+
     server.tool.side_effect = tool_decorator
     register(server, tool_env)
     return tools
+
 
 @pytest.fixture
 def ctx():
@@ -49,11 +56,14 @@ def ctx():
     c.request_context.meta = {"access_token": "token123"}
     return c
 
+
 @pytest.mark.asyncio
 async def test_all_ads_tools_errors(registered_tools, ctx, respx_mock):
     # Mock all to fail
-    respx_mock.route().mock(return_value=Response(400, json={"error": {"message": "Fail", "code": 100}}))
-    
+    respx_mock.route().mock(
+        return_value=Response(400, json={"error": {"message": "Fail", "code": 100}})
+    )
+
     tools_args = [
         ("ads.campaigns.list", AdsCampaignList(ad_account_id="1", fields=["name"])),
         ("ads.campaigns.update", AdsCampaignUpdate(campaign_id="1", patch={})),
@@ -65,7 +75,7 @@ async def test_all_ads_tools_errors(registered_tools, ctx, respx_mock):
         ("ads.ads.list", AdsAdsList(ad_account_id="1", fields=["name"])),
         ("ads.ads.update", AdsAdsUpdate(ad_id="1", patch={})),
     ]
-    
+
     for name, args in tools_args:
         func = registered_tools[name]
         result = await func(args, ctx)
