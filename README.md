@@ -155,6 +155,9 @@ docker run --rm -p 8000:8000 --env-file .env meta-mcp:latest meta-mcp-server --t
 ## JSON Schemas
 Tool input/output schemas are generated from the Pydantic models into the `schemas/` directory (see `scripts/generate_schemas.py`). They can be consumed by agents to understand argument/response shapes ahead of invoking a tool.
 
+![Generated Meta Graph MCP tool schemas](docs/assets/generated-schemas.png)
+
+
 ## Testing
 - Unit tests: `pytest`
 - Async HTTP and retry behaviour: `pytest-asyncio` + `respx`
