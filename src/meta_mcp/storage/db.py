@@ -15,7 +15,6 @@ from sqlalchemy.ext.asyncio import (
 from ..config import get_settings
 from .models import Base
 
-
 _engine: AsyncEngine | None = None
 _SessionFactory: async_sessionmaker[AsyncSession] | None = None
 

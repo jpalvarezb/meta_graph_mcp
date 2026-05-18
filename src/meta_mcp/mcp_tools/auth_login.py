@@ -18,7 +18,6 @@ from ..meta_client import (
 )
 from .common import ToolEnvironment, failure, success
 
-
 DEFAULT_SCOPES = [
     "pages_read_engagement",
     "pages_read_user_content",

@@ -63,7 +63,6 @@ from meta_mcp.meta_client import (  # type: ignore[attr-defined]
     ResearchPublicPagesPostsList,
 )
 
-
 TModel = TypeVar("TModel", bound=BaseModel)
 
 
